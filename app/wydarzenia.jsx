@@ -18,7 +18,7 @@ const Wydarzenia = () => {
     }, []);
 
     const handleEventPress = (eventId) => {
-        navigation.navigate('EventDetails', { eventId});
+        navigation.navigate('EventDetails', { eventId });
     };
 
     return (
@@ -26,9 +26,6 @@ const Wydarzenia = () => {
             <View style={styles.eventsContainer}>
                 {events.map((event, index) => (
                     <TouchableOpacity key={index} style={styles.row} onPress={() => handleEventPress(event.id_wydarzenia)}>
-                        <Text style={styles.companyName}>{event.nazwa_firmy}</Text>
-                        <Text style={styles.eventName}>{event.nazwa}</Text>
-                        <Text style={styles.address}>{event.adres}</Text>
                         {event.image_base64 && (
                             <Image
                                 source={{ uri: `data:image/jpeg;base64,${event.image_base64}` }}
@@ -36,6 +33,14 @@ const Wydarzenia = () => {
                                 resizeMode="contain"
                             />
                         )}
+                        <View style={styles.tekst}>
+                            <Text style={styles.companyName}>{event.nazwa_firmy}</Text>
+                            <Text style={styles.eventName}>{event.nazwa}</Text>
+                            <View style={styles.addressContainer}>
+                                <Text style={styles.address}>{event.adres}</Text>
+                            </View>
+                        </View>
+
                     </TouchableOpacity>
                 ))}
             </View>
@@ -48,33 +53,53 @@ const styles = StyleSheet.create({
         flex: 1,
         marginTop: 20,
         alignItems: 'center',
+
     },
     row: {
         borderWidth: 2,
         borderRadius: 20,
+        flexDirection: 'row',
         width: '90%',
         marginTop: 10,
         padding: 10,
         alignItems: 'center',
+        backgroundColor: '#78C6F0',
+        borderColor: '#07BBF3',
+        elevation: 10
     },
     companyName: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
+        color: '#F0EAEA'
     },
     eventName: {
-        fontSize: 14,
+        fontSize: 16,
         marginVertical: 5,
+        flexShrink: 1,
+        flexWrap: 'wrap',
     },
     address: {
-        fontSize: 12,
-        color: 'gray',
+        fontSize: 14,
+        color: 'black',
+        alignSelf: 'center',
+        marginHorizontal: 10,
     },
     image: {
-        width: 75,
-        height: 75,
-        marginTop: 10,
+        width: 60,
+        height: 60,
         borderRadius: 10,
+        justifyContent: 'center',
+        marginRight: 15
     },
+    tekst: {
+        flex: 1,
+    },
+    addressContainer: {
+
+        backgroundColor: '#F0EAEA',
+        alignSelf: 'flex-end',
+        borderRadius: 10,
+    }
 });
 
 export default Wydarzenia;
