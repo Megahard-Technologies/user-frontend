@@ -10,7 +10,7 @@ import { Slot, Stack } from 'expo-router'
 import Profile from './profile';
 //import { SafeAreaView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context'
-export default function Main() {
+const Main = () =>  {
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
 
   const toggleOverlay = () => {
@@ -315,3 +315,5 @@ const styles = StyleSheet.create({
     elevation: 5,
   }
 });
+
+export default Main;
