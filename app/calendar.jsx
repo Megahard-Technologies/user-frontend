@@ -10,7 +10,7 @@ const CalendarTest = () => {
 
     useEffect(() => {
         if (selected !== '') {
-            axios.get(`http://192.168.0.110:3000/api/plan/${selected}`)
+            axios.get(`http://localhost:3000/api/plan/${selected}`)
                 .then(response => {
                     setEvents(response.data);
                 })
@@ -33,9 +33,10 @@ const CalendarTest = () => {
                     }}
                 />
             </View>
+
             <View style={styles.eventsContainer}>
                 {events.map(event => (
-                    <Text key={event.id}>{event.tekst}</Text>
+                    <Text key={event.id} style={styles.row}>{event.tekst}</Text>
                 ))}
             </View>
 
@@ -49,8 +50,16 @@ const styles = StyleSheet.create({
     },
     eventsContainer: {
         marginTop: 20,
-        paddingHorizontal: 20,
+        alignItems: 'center',
     },
+    row: {
+        borderWidth: 2,
+        borderRadius: 20,
+        width: '80%',  
+        marginTop: 10,
+        padding: 10,
+        alignContent: 'center'
+    }
 });
 
 export default CalendarTest;

@@ -12,7 +12,7 @@ const Logowanie = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.get(`http://192.168.0.110:3000/api/login?login=${login}&password=${password}`);
+      const response = await axios.get(`http://localhost:3000/api/login?login=${login}&password=${password}`);
       if (response.data.success) {
         Alert.alert('Sukces', 'Zalogowano pomyślnie!');
         navigation.navigate('main');

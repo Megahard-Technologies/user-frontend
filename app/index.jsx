@@ -80,7 +80,7 @@ export default function Main() {
 
               style={{
                 height: 365,
-                width: 400,
+                width: '100%',
                 borderRadius: 20,
                 alignSelf: 'center',
                 paddingLeft: 20,
@@ -110,22 +110,26 @@ export default function Main() {
         </View>
 
         <View style={styles.carousel}>
-          <ScrollView horizontal>
-            <Link href="/todo">
-              <View style={styles.carouselItem}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+
+            <View style={styles.carouselItem}>
+              <Link href="/todo">
                 <Image source={require('../assets/To-Do.png')} resizeMode="contain" />
-              </View>
-            </Link>
-            <Link href="/friends'Friends">
-              <View style={styles.carouselItem}>
+              </Link>
+            </View>
+
+            <View style={styles.carouselItem}>
+              <Link href="/friends'Friends">
                 <Image source={require('../assets/Znajomi.png')} resizeMode="contain" />
-              </View>
-            </Link>
-            <Link href="/link3">
-              <View style={styles.carouselItem}>
+              </Link>
+            </View>
+
+            <View style={styles.carouselItem}>
+              <Link href="/wydarzenia">
                 <Image source={require('../assets/Wydarzenia.png')} resizeMode="contain" />
-              </View>
-            </Link>
+              </Link>
+            </View>
+
           </ScrollView>
         </View>
 
@@ -146,7 +150,7 @@ export default function Main() {
         </View>
 
         <View style={styles.poligonContainer}>
-          <Link href="/BarIndeksInfo">
+          <Link href="/wydarzenia">
             <Text>poligon</Text>
           </Link>
         </View>
@@ -178,7 +182,7 @@ export default function Main() {
           </View>
 
         </Overlay>
-        </ScrollView>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -219,7 +223,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 20,
     backgroundColor: '#57a5cf',
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
     marginLeft: 20,
@@ -253,13 +257,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingTop: 25,
     paddingLeft: 20,
+    paddingRight: 15,
   },
   bioinput: {
     paddingTop: 5,
     paddingLeft: 20,
     fontSize: 17,
-    width: 230,
-    height: 50
+    //width: 230,
+    //height: 50
   },
   /////////////////////////////
   poligonContainer: {
