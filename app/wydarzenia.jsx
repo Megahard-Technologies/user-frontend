@@ -51,7 +51,7 @@ const Wydarzenia = () => {
 const styles = StyleSheet.create({
     eventsContainer: {
         flex: 1,
-        marginTop: 20,
+        marginTop: 10,
         alignItems: 'center',
 
     },

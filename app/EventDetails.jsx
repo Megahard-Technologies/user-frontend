@@ -37,8 +37,6 @@ const EventDetails = () => {
 
   return (
     <ScrollView>
-      <View style={styles.space} />
-
       {eventDetails.map((event, index) => (
         <View key={index}>
           <Text style={styles.companyName}>{event.nazwa_firmy.toUpperCase()}</Text>
@@ -62,7 +60,7 @@ const EventDetails = () => {
 
           <View style={styles.line} />
 
-          <View style={styles.ColorContainer}>
+          <View style={styles.ColorContainerContact}>
             <View style={styles.row}>
               <Text style={styles.addressText}>Adres: </Text>
               <Text style={styles.address}>{event.adres}</Text>
@@ -131,6 +129,18 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     elevation: 10,
+  },
+  ColorContainerContact: {
+    backgroundColor: '#78C6F0',
+    borderColor: '#07BBF3',
+    borderWidth: 2,
+    marginVertical: 5,
+    borderRadius: 10,
+    width: '90%',
+    alignSelf: 'center',
+    elevation: 10,
+    paddingTop: 10,
+    paddingBottom: 10
   },
   address: {
     fontSize: 16,
