@@ -48,7 +48,7 @@ const Main = () =>  {
 
   return (
     <SafeAreaView style={styles.allpage}>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.headerContainer}>
           <Link href="/profile">
             <View >
@@ -150,7 +150,7 @@ const Main = () =>  {
         </View>
 
         <View style={styles.poligonContainer}>
-          <Link href="/wydarzenia">
+          <Link href="/BarIndeksInfo">
             <Text>poligon</Text>
           </Link>
         </View>

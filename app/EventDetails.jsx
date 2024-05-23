@@ -2,15 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
+import { AirbnbRating, Rating } from 'react-native-ratings';
 
 const EventDetails = () => {
   const route = useRoute();
   const { eventId } = route.params;
   const [eventDetails, setEventDetails] = useState([]);
   const [openingHours, setOpeningHours] = useState([]);
+  const [rating, setRating] = useState([]);
+  const [opinions, setOpinions] = useState([]);
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/api/wydarzenia/szczegoly/${eventId}`)
+    axios.get(`http://192.168.0.110:3000/api/wydarzenia/szczegoly/${eventId}`)
       .then(response => {
         setEventDetails(response.data);
       })
@@ -18,22 +21,42 @@ const EventDetails = () => {
         console.error('Error fetching event details:', error);
       });
 
-    axios.get(`http://localhost:3000/api/wydarzenia/godziny_otwarcia/${eventId}`)
+    axios.get(`http://192.168.0.110:3000/api/wydarzenia/godziny_otwarcia/${eventId}`)
       .then(response => {
         setOpeningHours(response.data);
       })
       .catch(error => {
         console.error('Error fetching opening hours:', error);
       });
+
+    axios.get(`http://192.168.0.110:3000/api/wydarzenia/ocena/${eventId}`)
+      .then(response => {
+        setRating(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching ocena:', error);
+      });
+
+    axios.get(`http://192.168.0.110:3000/api/wydarzenia/opinie/${eventId}`)
+      .then(response => {
+        setOpinions(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching ocena:', error);
+      });
   }, [eventId]);
 
-  if (!eventDetails || !openingHours) {
+  if (!eventDetails || !openingHours || !rating) {
     return (
       <View style={styles.container}>
         <Text>Loading...</Text>
       </View>
     );
   }
+
+  const ratingCompleted = (Rating) => {
+    console.warn("Rating is: " + Rating)
+  };
 
   return (
     <ScrollView>
@@ -94,7 +117,48 @@ const EventDetails = () => {
         </View>
       ))}
 
+      <View style={styles.ColorContainer}>
+        <Text style={styles.ocenaText}>Ocena:</Text>
+        {rating.map((star, index) => (
+          <View key={index} style={styles.row}>
+            <Text style={styles.ocenaText}>{star.avg_ilosc_gwiazdek}</Text>
+            <Rating
+              readonly={true}
+              showRating={false}
+              onFinishRating={ratingCompleted}
+              tintColor='#78C6F0'
+              imageSize={30}
+              startingValue={star.avg_ilosc_gwiazdek}
+              style={{ marginHorizontal: 10, marginVertical: 5 }}
+            />
 
+            <Text style={styles.ocenaText}>200 opinii</Text>
+          </View>
+        ))}
+        <View style={styles.row}>
+          <Text style={styles.address}>Twoja ocena</Text>
+
+          <Rating
+            showRating={false}
+            onFinishRating={ratingCompleted}
+            tintColor='#78C6F0'
+            imageSize={30}
+            startingValue={0}
+            style={{ marginHorizontal: 10, marginVertical: 5 }}
+          />
+        </View>
+
+      </View>
+      <View style={styles.ColorContainer}>
+        <Text style={[{ fontSize: 18 }, { fontWeight: 'bold' }, { marginLeft: 10 }, { paddingTop: 10 }, { color: 'white' }]}>Opinie:</Text>
+        {opinions.map((opinion, index) => (
+          <View key={index} style={styles.row}>
+            <Text style={[{ fontSize: 16 }, { fontWeight: 'bold' }, { marginLeft: 10 }, { paddingTop: 10 }]}>{opinion.czas}:</Text>
+            <Text style={[{ fontSize: 16 }, { marginLeft: 10 }, { paddingTop: 10 }]}>{opinion.opis}</Text>
+          </View>
+        ))}
+        <View style={styles.space} />
+      </View>
     </ScrollView>
   );
 };
@@ -170,6 +234,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 10,
     marginBottom: 10,
+    color: 'white',
+    fontWeight: 'bold'
   },
   dzien_tygodnia: {
     marginLeft: 10,
@@ -179,7 +245,15 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
     marginRight: 25,
     fontSize: 18
-  }
+  },
+  ocenaText: {
+    fontSize: 18,
+    color: 'white',
+    fontWeight: 'bold',
+
+    marginLeft: 10,
+    lineHeight: 22,
+  },
 });
 
 export default EventDetails;
