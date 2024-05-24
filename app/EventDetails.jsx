@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
-import { AirbnbRating, Rating } from 'react-native-ratings';
+import { Rating } from 'react-native-ratings';
+import { Button, TextInput } from 'react-native';
 
 const EventDetails = () => {
   const route = useRoute();
@@ -12,8 +13,10 @@ const EventDetails = () => {
   const [rating, setRating] = useState([]);
   const [opinions, setOpinions] = useState([]);
 
+  const [userOpinion, setUserOpinion] = useState('');
+
   useEffect(() => {
-    axios.get(`http://192.168.0.110:3000/api/wydarzenia/szczegoly/${eventId}`)
+    axios.get(`http://localhost:3000/api/wydarzenia/szczegoly/${eventId}`)
       .then(response => {
         setEventDetails(response.data);
       })
@@ -21,7 +24,7 @@ const EventDetails = () => {
         console.error('Error fetching event details:', error);
       });
 
-    axios.get(`http://192.168.0.110:3000/api/wydarzenia/godziny_otwarcia/${eventId}`)
+    axios.get(`http://localhost:3000/api/wydarzenia/godziny_otwarcia/${eventId}`)
       .then(response => {
         setOpeningHours(response.data);
       })
@@ -29,7 +32,7 @@ const EventDetails = () => {
         console.error('Error fetching opening hours:', error);
       });
 
-    axios.get(`http://192.168.0.110:3000/api/wydarzenia/ocena/${eventId}`)
+    axios.get(`http://localhost:3000/api/wydarzenia/ocena/${eventId}`)
       .then(response => {
         setRating(response.data);
       })
@@ -37,7 +40,7 @@ const EventDetails = () => {
         console.error('Error fetching ocena:', error);
       });
 
-    axios.get(`http://192.168.0.110:3000/api/wydarzenia/opinie/${eventId}`)
+    axios.get(`http://localhost:3000/api/wydarzenia/opinie/${eventId}`)
       .then(response => {
         setOpinions(response.data);
       })
@@ -54,6 +57,20 @@ const EventDetails = () => {
     );
   }
 
+  const submitOpinion = (id_uslugodawcy) => {
+    axios.post(`http://localhost:3000/api/wydarzenia/wysylanie_opinii/${id_uslugodawcy}`, {
+      opinion: userOpinion
+    })
+      .then(response => {
+        console.log('Opinion submitted:', response);
+        setUserOpinion('');
+      })
+      .catch(error => {
+        console.error('Error submitting opinion:', error);
+      });
+  };
+
+
   const ratingCompleted = (Rating) => {
     console.warn("Rating is: " + Rating)
   };
@@ -62,6 +79,7 @@ const EventDetails = () => {
     <ScrollView>
       {eventDetails.map((event, index) => (
         <View key={index}>
+          {/* <Text>{event.id_uslugodawcy}</Text> */}
           <Text style={styles.companyName}>{event.nazwa_firmy.toUpperCase()}</Text>
           <View style={styles.ColorContainer}>
             <Text style={styles.eventName}>{event.nazwa}</Text>
@@ -159,6 +177,23 @@ const EventDetails = () => {
         ))}
         <View style={styles.space} />
       </View>
+
+      <View style={styles.ColorContainer}>
+        <TextInput
+          style={styles.input}
+          onChangeText={setUserOpinion}
+          value={userOpinion}
+          placeholder="Przekaż nam swoją opinię"
+        />
+        {eventDetails.map((event, index) => (
+          <View style={styles.przeslij} key={index}>
+            <Button
+              title="Prześlij"
+              onPress={() => submitOpinion(event.id_uslugodawcy)}
+            />
+          </View>
+        ))}
+      </View>
     </ScrollView>
   );
 };
@@ -254,6 +289,29 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     lineHeight: 22,
   },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+  },
+  input: {
+    height: 40,
+    margin: 10,
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+  },
+  przeslij: {
+    backgroundColor: '#78C6F0',
+    color: 'white',
+    padding: 10,
+    textAlign: 'center',
+    justifyContent: 'center'
+  },
+
+
 });
 
 export default EventDetails;
