@@ -8,7 +8,7 @@ const Wydarzenia = () => {
     const [events, setEvents] = useState([]);
 
     useEffect(() => {
-        axios.get(`http://localhost:3000/api/wydarzenia`)
+        axios.get(`http://192.168.0.110:3000/api/wydarzenia`)
             .then(response => {
                 setEvents(response.data);
             })
@@ -22,7 +22,7 @@ const Wydarzenia = () => {
     };
 
     return (
-        <ScrollView>
+        <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.eventsContainer}>
                 {events.map((event, index) => (
                     <TouchableOpacity key={index} style={styles.row} onPress={() => handleEventPress(event.id_wydarzenia)}>
