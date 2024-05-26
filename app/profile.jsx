@@ -13,7 +13,7 @@ const Index = () => {
   ];
 
   return (
-    <ScrollView style={styles.scroll}>
+    <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
     <SafeAreaView style={styles.backgound}>
      
         <View style={styles.rowe}>

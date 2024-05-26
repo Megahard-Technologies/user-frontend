@@ -5,6 +5,7 @@ import { useRoute } from '@react-navigation/native';
 import { Rating } from 'react-native-ratings';
 import { Button, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 
 const EventDetails = () => {
   const route = useRoute();
@@ -87,6 +88,7 @@ const EventDetails = () => {
   };
 
   return (
+    <KeyboardAvoidingView behavior="position" style={{flex: 1}}>
     <ScrollView showsVerticalScrollIndicator={false}>
       <SafeAreaView>
 
@@ -233,6 +235,7 @@ const EventDetails = () => {
 
       </SafeAreaView>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -246,6 +249,7 @@ const styles = StyleSheet.create({
   },
   rowOpinie: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   companyName: {
     fontSize: 25,
@@ -382,6 +386,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     marginTop: 10,
+    padding: 5,
   },
   opiniaText: {
     fontSize: 18,
