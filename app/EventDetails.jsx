@@ -6,6 +6,7 @@ import { Rating } from 'react-native-ratings';
 import { Button, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAvoidingView, Platform } from 'react-native';
+import { v4 as uuidv4 } from 'uuid';
 
 const EventDetails = () => {
   const route = useRoute();
@@ -67,31 +68,35 @@ const EventDetails = () => {
   }
 
   const ratingCompleted = (Rating) => {
-    console.warn("Rating is: " + Rating);
+    //console.warn("Rating is: " + Rating);
     setUserRating(Rating);
   };
 
   const submitOpinion = (id_uslugodawcy) => {
     axios.post(`http://192.168.0.110:3000/api/wydarzenia/wysylanie_opinii/${id_uslugodawcy}`, {
       opinion: userOpinion,
-      rating: userRating
+      rating: userRating,
+      
     })
       .then(response => {
-        console.log('Opinion submitted:', response);
+        //console.log('Opinion submitted:', response);
         setUserOpinion('');
         setUserRating(null);
-        //window.location.reload();
       })
       .catch(error => {
         console.error('Error submitting opinion:', error);
       });
   };
 
+
+  
+
   return (
     <KeyboardAvoidingView behavior="position" style={{flex: 1}}>
     <ScrollView showsVerticalScrollIndicator={false}>
       <SafeAreaView>
 
+        
         {eventDetails.map((event, index) => (
           <View key={index}>
             {/* <Text>{event.id_uslugodawcy}</Text> */}
@@ -175,8 +180,8 @@ const EventDetails = () => {
 
 
           {opinions.map((opinion, index) => (
-            <View style={styles.opiniaContainer}>
-              <View key={index} style={styles.rowOpinie}>
+            <View key={index} style={styles.opiniaContainer}>
+              <View style={styles.rowOpinie}>
                 <View>
                   <Text style={styles.opiniaCzas}>{opinion.czas}:</Text>
                 </View>

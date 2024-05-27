@@ -10,7 +10,8 @@ import { Slot, Stack } from 'expo-router'
 import Profile from './profile';
 //import { SafeAreaView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context'
-const Main = () =>  {
+
+const Main = () => {
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
 
   const toggleOverlay = () => {
@@ -109,29 +110,37 @@ const Main = () =>  {
           </LinearGradient>
         </View>
 
-        <View style={styles.carousel}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={styles.carousel}>
 
             <View style={styles.carouselItem}>
               <Link href="/todo">
-                <Image source={require('../assets/To-Do.png')} resizeMode="contain" />
+                <View>
+                <Image source={require('../assets/To-Do.png')}/>
+                </View>
               </Link>
             </View>
 
             <View style={styles.carouselItem}>
               <Link href="/friends'Friends">
-                <Image source={require('../assets/Znajomi.png')} resizeMode="contain" />
+              <View>
+                <Image source={require('../assets/Znajomi.png')}/>
+              </View>
               </Link>
             </View>
 
             <View style={styles.carouselItem}>
               <Link href="/wydarzenia">
-                <Image source={require('../assets/Wydarzenia.png')} resizeMode="contain" />
+              <View>
+                <Image source={require('../assets/Wydarzenia.png')}/>
+              </View>
               </Link>
             </View>
 
-          </ScrollView>
-        </View>
+          </View>
+        </ScrollView>
+        
 
         <View style={styles.bio}>
           <Image style={styles.bioimg} source={require('../assets/bioImg.png')} resizeMode="contain" />
@@ -149,11 +158,11 @@ const Main = () =>  {
           </View>
         </View>
 
-        <View style={styles.poligonContainer}>
+        {/* <View style={styles.poligonContainer}>
           <Link href="/BarIndeksInfo">
             <Text>poligon</Text>
           </Link>
-        </View>
+        </View> */}
 
         <Overlay
           isVisible={isOverlayVisible}
@@ -223,17 +232,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 20,
     backgroundColor: '#57a5cf',
+
     paddingHorizontal: 20,
     paddingVertical: 10,
+
     borderRadius: 20,
     marginLeft: 20,
     height: 210,
     marginRight: 20,
     elevation: 5,
+    alignItems: 'center',
   },
   carouselItem: {
     paddingHorizontal: 45,
-    paddingVertical: 40,
+    paddingVertical: 45,
   },
   /////////////////////////////
   bio: {
