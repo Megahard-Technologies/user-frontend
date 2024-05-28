@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, Image, ScrollView, TouchableOpacity, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Wydarzenia = () => {
     const navigation = useNavigation();
     const [events, setEvents] = useState([]);
+    const [sortDirection, setSortDirection] = useState('asc');
 
     useEffect(() => {
         axios.get(`http://192.168.0.110:3000/api/wydarzenia`)
@@ -21,29 +23,46 @@ const Wydarzenia = () => {
         navigation.navigate('EventDetails', { eventId });
     };
 
+    const handleSortButtonPress = () => {
+        const newSortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        const sortedEvents = [...events].sort((a, b) => {
+            if (newSortDirection === 'asc') {
+                //console.log(new Date(a.czas_rozpoczecia), new Date(b.czas_rozpoczecia));
+                return new Date(a.czas_rozpoczecia) - new Date(b.czas_rozpoczecia);
+            } else {
+                return new Date(b.czas_rozpoczecia) - new Date(a.czas_rozpoczecia);
+            }
+        });
+        setSortDirection(newSortDirection);
+        setEvents(sortedEvents);
+    };
+
     return (
         <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.eventsContainer}>
-                {events.map((event, index) => (
-                    <TouchableOpacity key={index} style={styles.row} onPress={() => handleEventPress(event.id_wydarzenia)}>
-                        {event.image_base64 && (
-                            <Image
-                                source={{ uri: `data:image/jpeg;base64,${event.image_base64}` }}
-                                style={styles.image}
-                                resizeMode="contain"
-                            />
-                        )}
-                        <View style={styles.tekst}>
-                            <Text style={styles.companyName}>{event.nazwa_firmy}</Text>
-                            <Text style={styles.eventName}>{event.nazwa}</Text>
-                            <View style={styles.addressContainer}>
-                                <Text style={styles.address}>{event.adres}</Text>
+            <SafeAreaView>
+                <View style={styles.eventsContainer}>
+                <Button title={sortDirection === 'asc' ? "Sortuj od najnowszych" : "Sortuj od najstarszych"} onPress={handleSortButtonPress} />
+                    {events.map((event, index) => (
+                        <TouchableOpacity key={index} style={styles.row} onPress={() => handleEventPress(event.id_wydarzenia)}>
+                            {event.image_base64 && (
+                                <Image
+                                    source={{ uri: `data:image/jpeg;base64,${event.image_base64}` }}
+                                    style={styles.image}
+                                    resizeMode="contain"
+                                />
+                            )}
+                            <View style={styles.tekst}>
+                                <Text style={styles.companyName}>{event.nazwa_firmy}</Text>
+                                <Text style={styles.eventName}>{event.nazwa}</Text>
+                                <View style={styles.addressContainer}>
+                                    <Text style={styles.address}>{event.adres}</Text>
+                                </View>
                             </View>
-                        </View>
 
-                    </TouchableOpacity>
-                ))}
-            </View>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            </SafeAreaView>
         </ScrollView>
     );
 };

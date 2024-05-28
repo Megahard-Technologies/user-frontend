@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
 import { Rating } from 'react-native-ratings';
 import { Button, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAvoidingView, Platform } from 'react-native';
-import { v4 as uuidv4 } from 'uuid';
+import * as Network from 'expo-network';
 
 const EventDetails = () => {
   const route = useRoute();
+
   const { eventId } = route.params;
   const [eventDetails, setEventDetails] = useState([]);
   const [openingHours, setOpeningHours] = useState([]);
@@ -18,11 +19,48 @@ const EventDetails = () => {
 
   const [userOpinion, setUserOpinion] = useState('');
   const [userRating, setUserRating] = useState(null);
+  const [ip, setIp] = useState('');
+  const [providerId, setProviderId] = useState('');
+  const [flag, setFlag] = useState(false);
+
+  // useEffect(() => {
+  //   Network.getIpAddressAsync().then(ip => {
+  //     console.log(ip);
+  //   });  
+  // });
+
+  const ratingCompleted = (Rating) => {
+    //console.warn("Rating is: " + Rating);
+    setUserRating(Rating);
+  };
+
+  const submitOpinion = (id_uslugodawcy) => {
+    Network.getIpAddressAsync().then(ip => {
+      axios.post(`http://192.168.0.110:3000/api/wydarzenia/wysylanie_opinii/${id_uslugodawcy}`, {
+        opinion: userOpinion,
+        rating: userRating,
+        ip: ip
+      })
+        .then(response => {
+          setUserOpinion('');
+          setUserRating(null);
+          setIp(ip);
+        })
+        .catch(error => {
+          console.error('Error submitting opinion:', error);
+        });
+    });
+  };
+
+  Network.getIpAddressAsync().then(ip => {
+    setIp(ip);
+  });
 
   useEffect(() => {
     axios.get(`http://192.168.0.110:3000/api/wydarzenia/szczegoly/${eventId}`)
       .then(response => {
         setEventDetails(response.data);
+        setProviderId(response.data[0].id_uslugodawcy);
       })
       .catch(error => {
         console.error('Error fetching event details:', error);
@@ -57,7 +95,30 @@ const EventDetails = () => {
       .catch(error => {
         console.error('Error fetching ocena:', error);
       });
-  }, [eventId]);
+
+
+    const sendValid = async () => {
+      console.log('IP:', ip);
+      console.log('provider id:', providerId);
+
+      try {
+        const response = await axios.get(`http://192.168.0.110:3000/api/wydarzenia/walidacja_wysylanie_opinii?ip=${ip}&provider_id=${providerId}`);
+        if (response.data.success) {
+          //Alert.alert('Jest taki wpis');
+          //flag = true;
+          setFlag(false);
+        } else {
+          //Alert.alert('Nie ma takiego wpisu');
+          setFlag(true);
+        }
+      } catch (error) {
+        console.error('Error sending valid:', error);
+        Alert.alert('Błąd', 'Coś poszło nie tak podczas wysyłania');
+      }
+    };
+
+    sendValid();
+  }, [eventId, ip, providerId]);
 
   if (!eventDetails || !openingHours || !rating) {
     return (
@@ -67,179 +128,179 @@ const EventDetails = () => {
     );
   }
 
-  const ratingCompleted = (Rating) => {
-    //console.warn("Rating is: " + Rating);
-    setUserRating(Rating);
-  };
-
-  const submitOpinion = (id_uslugodawcy) => {
-    axios.post(`http://192.168.0.110:3000/api/wydarzenia/wysylanie_opinii/${id_uslugodawcy}`, {
-      opinion: userOpinion,
-      rating: userRating,
-      
-    })
-      .then(response => {
-        //console.log('Opinion submitted:', response);
-        setUserOpinion('');
-        setUserRating(null);
-      })
-      .catch(error => {
-        console.error('Error submitting opinion:', error);
-      });
-  };
-
-
-  
 
   return (
-    <KeyboardAvoidingView behavior="position" style={{flex: 1}}>
-    <ScrollView showsVerticalScrollIndicator={false}>
-      <SafeAreaView>
+    <KeyboardAvoidingView behavior="position" style={{ flex: 1 }}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <SafeAreaView>
 
-        
-        {eventDetails.map((event, index) => (
-          <View key={index}>
-            {/* <Text>{event.id_uslugodawcy}</Text> */}
-            <Text style={styles.companyName}>{event.nazwa_firmy.toUpperCase()}</Text>
-            <View style={styles.ColorContainer}>
-              <Text style={styles.eventName}>{event.nazwa}</Text>
-            </View>
-
-            <View style={styles.ColorContainer}>
-              <Text style={styles.opis}>{event.opis}</Text>
-              <View style={styles.row}>
-                <Text style={styles.addressText}>Oferta ważna od: </Text>
-                <Text style={styles.address}>{event.czas_rozpoczecia}</Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.addressText}>Oferta ważna do: </Text>
-                <Text style={styles.address}>{event.czas_zakonczenia}</Text>
-              </View>
-
-              <View style={styles.space} />
-            </View>
-
-            <View style={styles.line} />
-
-            <View style={styles.ColorContainerContact}>
-              <View style={styles.row}>
-                <Text style={styles.addressText}>Adres: </Text>
-                <Text style={styles.address}>{event.adres}</Text>
-              </View>
-
-              <View style={styles.row}>
-                <Text style={styles.addressText}>Mail:</Text>
-                <Text style={styles.address}>{event.email}</Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.addressText}>Telefon:</Text>
-                <Text style={styles.address}>{event.nr_telefonu}</Text>
-              </View>
-            </View>
-
-            <View style={styles.ColorContainer}>
-              <View style={styles.space} />
-
-              <Text style={styles.godziny_otwarcia}>Godziny otwarcia:</Text>
-              {openingHours.map((hour, index) => (
-                <View key={index} style={styles.row}>
-                  <Text style={styles.dzien_tygodnia}>{hour.dzien_tygodnia}:</Text>
-                  <Text style={styles.godzina}>{hour.otwarcie} - {hour.zamkniecie}</Text>
-                </View>
-              ))}
-
-              <View style={styles.space} />
-            </View>
-
-            <View style={styles.line} />
-          </View>
-        ))}
-
-        <View style={styles.ColorContainer}>
-          <Text style={styles.ocenaText}>Ocena:</Text>
-          {rating.map((star, index) => (
-            <View key={index} style={styles.row}>
-              <Text style={styles.ocenaText}>{star.avg_ilosc_gwiazdek}</Text>
-              <Rating
-                readonly={true}
-                showRating={false}
-                onFinishRating={ratingCompleted}
-                tintColor='#78C6F0'
-                imageSize={30}
-                startingValue={star.avg_ilosc_gwiazdek}
-                style={{ marginHorizontal: 10, marginVertical: 5 }}
-              />
-
-              <Text style={styles.ocenaText}>{star.ilosc_opinii} ocen</Text>
-            </View>
-          ))}
-        </View>
-
-        <View style={styles.ColorContainer}>
-          <Text style={styles.opiniaText}>Opinie:</Text>
-
-
-          {opinions.map((opinion, index) => (
-            <View key={index} style={styles.opiniaContainer}>
-              <View style={styles.rowOpinie}>
-                <View>
-                  <Text style={styles.opiniaCzas}>{opinion.czas}:</Text>
-                </View>
-                <Text style={styles.opiniaOpis}>{opinion.opis}</Text>
-              </View>
-            </View>
-          ))}
-
-
-          <View style={styles.space} />
-        </View>
-
-        <View style={styles.ColorContainer}>
-          <View style={styles.row}>
-            <Text style={styles.ocenaText}>Twoja ocena</Text>
-
-            <Rating
-              showRating={false}
-              onFinishRating={ratingCompleted}
-              tintColor='#78C6F0'
-              imageSize={30}
-              startingValue={0 || userRating}
-              style={{ marginHorizontal: 10, marginVertical: 5 }}
+          {/* <View style={styles.przeslij}>
+            <Button
+              title="Test"
+              color={'red'}
+              style={styles.ButtonStyle}
+              onPress={() => sendValid(ip)}
             />
-          </View>
+          </View> */}
 
-          <TextInput
-            style={styles.input}
-            onChangeText={setUserOpinion}
-            value={userOpinion}
-            multiline={true}
-            placeholder="Przekaż nam swoją opinię"
-          />
-          <View style={styles.row}>
-            <View style={styles.przeslij}>
-              <Button
-                title="Anuluj"
-                color={'red'}
-                style={styles.ButtonStyle}
+          {eventDetails.map((event, index) => (
+            <View key={index}>
+              {/* <Text>{event.id_uslugodawcy}</Text> */}
+              <Text style={styles.companyName}>{event.nazwa_firmy.toUpperCase()}</Text>
+              <View style={styles.ColorContainer}>
+                <Text style={styles.eventName}>{event.nazwa}</Text>
+              </View>
 
-              />
+              <View style={styles.ColorContainer}>
+                <Text style={styles.opis}>{event.opis}</Text>
+                <View style={styles.row}>
+                  <Text style={styles.addressText}>Oferta ważna od: </Text>
+                  <Text style={styles.address}>{event.czas_rozpoczecia}</Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={styles.addressText}>Oferta ważna do: </Text>
+                  <Text style={styles.address}>{event.czas_zakonczenia}</Text>
+                </View>
+
+                <View style={styles.space} />
+              </View>
+
+              <View style={styles.line} />
+
+              <View style={styles.ColorContainerContact}>
+                <View style={styles.row}>
+                  <Text style={styles.addressText}>Adres: </Text>
+                  <Text style={styles.address}>{event.adres}</Text>
+                </View>
+
+                <View style={styles.row}>
+                  <Text style={styles.addressText}>Mail:</Text>
+                  <Text style={styles.address}>{event.email}</Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={styles.addressText}>Telefon:</Text>
+                  <Text style={styles.address}>{event.nr_telefonu}</Text>
+                </View>
+              </View>
+
+              <View style={styles.ColorContainer}>
+                <View style={styles.space} />
+
+                <Text style={styles.godziny_otwarcia}>Godziny otwarcia:</Text>
+                {openingHours.map((hour, index) => (
+                  <View key={index} style={styles.row}>
+                    <Text style={styles.dzien_tygodnia}>{hour.dzien_tygodnia}:</Text>
+                    <Text style={styles.godzina}>{hour.otwarcie} - {hour.zamkniecie}</Text>
+                  </View>
+                ))}
+
+                <View style={styles.space} />
+              </View>
+
+              <View style={styles.line} />
             </View>
 
-            {eventDetails.map((event, index) => (
-              <View style={styles.przeslij} key={index}>
-                <Button
-                  title="Prześlij"
-                  onPress={() => submitOpinion(event.id_uslugodawcy)}
+          ))}
+
+          <View style={styles.ColorContainer}>
+            <Text style={styles.ocenaText}>Ocena:</Text>
+            {rating.map((star, index) => (
+              <View key={index} style={styles.row}>
+                <Text style={styles.ocenaText}>{star.avg_ilosc_gwiazdek}</Text>
+                <Rating
+                  readonly={true}
+                  showRating={false}
+                  onFinishRating={ratingCompleted}
+                  tintColor='#78C6F0'
+                  imageSize={30}
+                  startingValue={star.avg_ilosc_gwiazdek}
+                  style={{ marginHorizontal: 10, marginVertical: 5 }}
                 />
+
+                <Text style={styles.ocenaText}>{star.ilosc_opinii} ocen</Text>
               </View>
             ))}
           </View>
-        </View>
+
+          <ScrollView style={styles.ColorContainerOpinia} showsVerticalScrollIndicator={false}>
+            <Text style={styles.opiniaText}>Opinie:</Text>
 
 
+            {opinions.map((opinion, index) => (
+              <View key={index} style={styles.opiniaContainer}>
+                <View style={styles.rowOpinie}>
+                  <View>
+                    <Text style={styles.opiniaCzas}>{opinion.czas}:</Text>
+                  </View>
+                  <Text style={styles.opiniaOpis}>{opinion.opis}</Text>
+                </View>
+              </View>
+            ))}
 
-      </SafeAreaView>
-    </ScrollView>
+
+            <View style={styles.space} />
+          </ScrollView>
+
+          {flag === true ? (
+            <View style={styles.ColorContainer}>
+              <View style={styles.row}>
+                <Text style={styles.ocenaText}>Twoja ocena</Text>
+
+                <Rating
+                  showRating={false}
+                  onFinishRating={ratingCompleted}
+                  tintColor='#78C6F0'
+                  imageSize={30}
+                  startingValue={0 || userRating}
+                  style={{ marginHorizontal: 10, marginVertical: 5 }}
+                />
+              </View>
+
+              <TextInput
+                style={styles.input}
+                onChangeText={setUserOpinion}
+                value={userOpinion}
+                multiline={true}
+                placeholder="Przekaż nam swoją opinię"
+              />
+
+              <View style={styles.row}>
+
+                {/* <View style={styles.przeslij}>
+                  <Button
+                    title="Test"
+                    color={'red'}
+                    style={styles.ButtonStyle}
+                    onPress={() => sendValid(ip)}
+                  />
+                </View> */}
+
+                <View style={styles.przeslij}>
+                  <Button
+                    title="Anuluj"
+                    color={'red'}
+                    style={styles.ButtonStyle}
+                  />
+                </View>
+
+                {eventDetails.map((event, index) => (
+                  <View style={styles.przeslij} key={index}>
+                    <Button
+                      title="Prześlij"
+                      onPress={() => submitOpinion(event.id_uslugodawcy)}
+                    />
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : (
+            <View style={styles.przekazalesOpinie}>
+              <Text style={styles.ocenaText}>Przekazałeś już swoją opinię</Text>
+            </View>
+          )}
+
+        </SafeAreaView>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
@@ -278,6 +339,28 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     elevation: 10,
+  },
+  ColorContainerOpinia: { 
+    backgroundColor: '#78C6F0',
+    borderColor: '#07BBF3',
+    borderWidth: 2,
+    marginVertical: 5,
+    borderRadius: 10,
+    width: '90%',
+    alignSelf: 'center',
+    elevation: 10,
+    height: 300,
+  },
+  przekazalesOpinie: {
+    backgroundColor: '#78C6F0',
+    borderColor: '#07BBF3',
+    borderWidth: 2,
+    marginVertical: 5,
+    borderRadius: 10,
+    width: '90%',
+    alignSelf: 'center',
+    elevation: 10,
+    padding: 10,
   },
   ColorContainerContact: {
     backgroundColor: '#78C6F0',
