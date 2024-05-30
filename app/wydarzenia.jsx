@@ -10,7 +10,7 @@ const Wydarzenia = () => {
     const [sortDirection, setSortDirection] = useState('asc');
 
     useEffect(() => {
-        axios.get(`http://192.168.0.110:3000/api/wydarzenia`)
+        axios.get(`http://192.168.0.162:3000/api/wydarzenia`)
             .then(response => {
                 setEvents(response.data);
             })

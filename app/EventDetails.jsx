@@ -22,21 +22,22 @@ const EventDetails = () => {
   const [ip, setIp] = useState('');
   const [providerId, setProviderId] = useState('');
   const [flag, setFlag] = useState(false);
+  
+  const [reload, setReload] = useState(false);
 
-  // useEffect(() => {
-  //   Network.getIpAddressAsync().then(ip => {
-  //     console.log(ip);
-  //   });  
-  // });
 
   const ratingCompleted = (Rating) => {
     //console.warn("Rating is: " + Rating);
     setUserRating(Rating);
   };
 
+  Network.getIpAddressAsync().then(ip => {
+    setIp(ip);
+  });
+
   const submitOpinion = (id_uslugodawcy) => {
     Network.getIpAddressAsync().then(ip => {
-      axios.post(`http://192.168.0.110:3000/api/wydarzenia/wysylanie_opinii/${id_uslugodawcy}`, {
+      axios.post(`http://192.168.0.162:3000/api/wydarzenia/wysylanie_opinii/${id_uslugodawcy}`, {
         opinion: userOpinion,
         rating: userRating,
         ip: ip
@@ -45,6 +46,7 @@ const EventDetails = () => {
           setUserOpinion('');
           setUserRating(null);
           setIp(ip);
+          setReload(!reload);
         })
         .catch(error => {
           console.error('Error submitting opinion:', error);
@@ -52,12 +54,29 @@ const EventDetails = () => {
     });
   };
 
-  Network.getIpAddressAsync().then(ip => {
-    setIp(ip);
-  });
+  const deleteOpinion = () => {
+    Network.getIpAddressAsync().then(ip => {
+      axios.post(`http://192.168.0.162:3000/api/wydarzenia/usuwanie_opinii`, {
+        id_uslugodawcy: providerId,
+        ip: ip
+      })
+        .then(response => {
+          setReload(!reload);
+        })
+        .catch(error => {
+          console.error('Error submitting opinion:', error);
+        });
+    });
+  };
+
+  function resetUserInput() {
+    setReload(!reload);
+    setUserOpinion('');
+    setUserRating(null);
+  }
 
   useEffect(() => {
-    axios.get(`http://192.168.0.110:3000/api/wydarzenia/szczegoly/${eventId}`)
+    axios.get(`http://192.168.0.162:3000/api/wydarzenia/szczegoly/${eventId}`)
       .then(response => {
         setEventDetails(response.data);
         setProviderId(response.data[0].id_uslugodawcy);
@@ -66,7 +85,7 @@ const EventDetails = () => {
         console.error('Error fetching event details:', error);
       });
 
-    axios.get(`http://192.168.0.110:3000/api/wydarzenia/godziny_otwarcia/${eventId}`)
+    axios.get(`http://192.168.0.162:3000/api/wydarzenia/godziny_otwarcia/${eventId}`)
       .then(response => {
         setOpeningHours(response.data);
       })
@@ -74,7 +93,7 @@ const EventDetails = () => {
         console.error('Error fetching opening hours:', error);
       });
 
-    axios.get(`http://192.168.0.110:3000/api/wydarzenia/ocena/${eventId}`)
+    axios.get(`http://192.168.0.162:3000/api/wydarzenia/ocena/${eventId}`)
       .then(response => {
         setRating(response.data);
       })
@@ -82,7 +101,7 @@ const EventDetails = () => {
         console.error('Error fetching ocena:', error);
       });
 
-    axios.get(`http://192.168.0.110:3000/api/wydarzenia/opinie/${eventId}`)
+    axios.get(`http://192.168.0.162:3000/api/wydarzenia/opinie/${eventId}`)
       .then(response => {
         for (let i = response.data.length - 1; i >= 0; i--) {
           if (response.data[i].opis === null || response.data[i].opis === '' || response.data[i].opis.length === 0) {
@@ -97,28 +116,44 @@ const EventDetails = () => {
       });
 
 
-    const sendValid = async () => {
-      console.log('IP:', ip);
-      console.log('provider id:', providerId);
+    //   async function sendValid() {
+    //   console.log('IP:', ip);
+    //   console.log('provider id:', providerId);
+    //   try {
+    //     const response = await axios.get(`http://192.168.0.162:3000/api/wydarzenia/walidacja_wysylanie_opinii?ip=${ip}&provider_id=${providerId}`);
+    //     if (response.data.success) {
+    //       //Alert.alert('Jest taki wpis');
+    //       //flag = true;
+    //       setFlag(false);
+    //     } else {
+    //       //Alert.alert('Nie ma takiego wpisu');
+    //       setFlag(true);
+    //     }
+    //   } catch (error) {
+    //     console.error('Error sending valid:', error);
+    //     Alert.alert('Błąd', 'Coś poszło nie tak podczas wysyłania');
+    //   }
+    // };
 
-      try {
-        const response = await axios.get(`http://192.168.0.110:3000/api/wydarzenia/walidacja_wysylanie_opinii?ip=${ip}&provider_id=${providerId}`);
-        if (response.data.success) {
-          //Alert.alert('Jest taki wpis');
-          //flag = true;
-          setFlag(false);
-        } else {
-          //Alert.alert('Nie ma takiego wpisu');
-          setFlag(true);
-        }
-      } catch (error) {
-        console.error('Error sending valid:', error);
-        Alert.alert('Błąd', 'Coś poszło nie tak podczas wysyłania');
-      }
-    };
+    // sendValid();
+   
+      axios.get(`http://192.168.0.162:3000/api/wydarzenia/walidacja_wysylanie_opinii?ip=${ip}&provider_id=${providerId}`)
+        .then(response => {
+          if (response.data.success) {
+            //Alert.alert('Jest taki wpis');
+            //flag = true;
+            setFlag(false);
+          } else {
+            //Alert.alert('Nie ma takiego wpisu');
+            setFlag(true);
+          }
+        })
+        .catch(error => {
+          console.error('Error sending valid:', error);
+          Alert.alert('Błąd', 'Coś poszło nie tak podczas wysyłania');
+        });
 
-    sendValid();
-  }, [eventId, ip, providerId]);
+  }, [reload, eventId, ip, providerId]);
 
   if (!eventDetails || !openingHours || !rating) {
     return (
@@ -133,16 +168,6 @@ const EventDetails = () => {
     <KeyboardAvoidingView behavior="position" style={{ flex: 1 }}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <SafeAreaView>
-
-          {/* <View style={styles.przeslij}>
-            <Button
-              title="Test"
-              color={'red'}
-              style={styles.ButtonStyle}
-              onPress={() => sendValid(ip)}
-            />
-          </View> */}
-
           {eventDetails.map((event, index) => (
             <View key={index}>
               {/* <Text>{event.id_uslugodawcy}</Text> */}
@@ -262,24 +287,16 @@ const EventDetails = () => {
                 value={userOpinion}
                 multiline={true}
                 placeholder="Przekaż nam swoją opinię"
+                placeholderTextColor={'grey'}
               />
 
               <View style={styles.row}>
-
-                {/* <View style={styles.przeslij}>
-                  <Button
-                    title="Test"
-                    color={'red'}
-                    style={styles.ButtonStyle}
-                    onPress={() => sendValid(ip)}
-                  />
-                </View> */}
-
                 <View style={styles.przeslij}>
                   <Button
                     title="Anuluj"
                     color={'red'}
                     style={styles.ButtonStyle}
+                    onPress={() => resetUserInput()}
                   />
                 </View>
 
@@ -296,7 +313,16 @@ const EventDetails = () => {
           ) : (
             <View style={styles.przekazalesOpinie}>
               <Text style={styles.ocenaText}>Przekazałeś już swoją opinię</Text>
+              <View style={styles.przeslijUsuwanie}>
+                <Button
+                  title="Prześlij opinię jeszcze raz"
+                  color={'red'}
+                  style={styles.ButtonStyle}
+                  onPress={() => deleteOpinion()}
+                />
+              </View>
             </View>
+
           )}
 
         </SafeAreaView>
@@ -340,7 +366,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     elevation: 10,
   },
-  ColorContainerOpinia: { 
+  ColorContainerOpinia: {
     backgroundColor: '#78C6F0',
     borderColor: '#07BBF3',
     borderWidth: 2,
@@ -443,7 +469,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     justifyContent: 'center'
   },
-
+  przeslijUsuwanie:{
+    backgroundColor: '#78C6F0',
+    color: 'white',
+    padding: 10,
+    textAlign: 'center',
+    justifyContent: 'center'
+  },
   ocenaText: {
     fontSize: 18,
     color: 'white',
