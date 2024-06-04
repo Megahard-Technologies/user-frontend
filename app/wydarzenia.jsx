@@ -1,23 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Image, ScrollView, TouchableOpacity, Button } from 'react-native';
+import { View, StyleSheet, Text, Image, ScrollView, TouchableOpacity, Button, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Wydarzenia = () => {
+    const SERVER_IP = '10.128.135.231';
+
     const navigation = useNavigation();
     const [events, setEvents] = useState([]);
     const [sortDirection, setSortDirection] = useState('asc');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        axios.get(`http://192.168.0.162:3000/api/wydarzenia`)
+        setIsLoading(true);
+        setTimeout(() => {
+        axios.get(`http://${SERVER_IP}:3000/api/wydarzenia`)
             .then(response => {
                 setEvents(response.data);
+                setIsLoading(false);
             })
             .catch(error => {
                 console.error('Error fetching events:', error);
             });
+        }, 500);
     }, []);
+
 
     const handleEventPress = (eventId) => {
         navigation.navigate('EventDetails', { eventId });
@@ -37,11 +45,22 @@ const Wydarzenia = () => {
         setEvents(sortedEvents);
     };
 
+    if (isLoading) {
+        return (
+            <View style={styles.loading}>
+                <ActivityIndicator size="large" color="#78C6F0" />
+            </View>
+        );
+    }
+
+
     return (
         <ScrollView showsVerticalScrollIndicator={false}>
             <SafeAreaView>
                 <View style={styles.eventsContainer}>
-                <Button title={sortDirection === 'asc' ? "Sortuj od najnowszych" : "Sortuj od najstarszych"} onPress={handleSortButtonPress} />
+                    <View style={{alignSelf: 'flex-end', marginRight: 20}}>
+                    <Button title={sortDirection === 'asc' ? "Sortuj od najnowszych" : "Sortuj od najstarszych"} onPress={handleSortButtonPress} />
+                    </View>
                     {events.map((event, index) => (
                         <TouchableOpacity key={index} style={styles.row} onPress={() => handleEventPress(event.id_wydarzenia)}>
                             {event.image_base64 && (
@@ -72,7 +91,6 @@ const styles = StyleSheet.create({
         flex: 1,
         marginTop: 10,
         alignItems: 'center',
-
     },
     row: {
         borderWidth: 2,
@@ -114,11 +132,15 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     addressContainer: {
-
         backgroundColor: '#F0EAEA',
         alignSelf: 'flex-end',
         borderRadius: 10,
-    }
+    },
+    loading: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
 });
 
 export default Wydarzenia;

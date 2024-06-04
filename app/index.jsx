@@ -14,6 +14,49 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 const Main = () => {
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
 
+  const [imageToDo, setImageToDo] = useState(require('../assets/To-Do.png'));
+  const [imageZnajomi, setImageZnajomi] = useState(require('../assets/Znajomi.png'));
+  const [imageWydarzenia, setImageWydarzenia] = useState(require('../assets/Wydarzenia.png'));
+  const [imageDzwonek, setImageDzwonek] = useState(require('../assets/Dzwonek.png'));
+  const [imageAwatar, setImageAwatar] = useState(require('../assets/Awatar.png'));
+
+
+
+  const handleClickInToDo = () => {
+    setImageToDo(require('../assets/To-Do-biale.png'));
+  };
+  const handleClickOutToDo = () => {
+    setImageToDo(require('../assets/To-Do.png'));
+  };
+
+  const handleClickInZnajomi = () => {
+    setImageZnajomi(require('../assets/Znajomi-biale.png'));
+  };
+  const handleClickOutZnajomi = () => {
+    setImageZnajomi(require('../assets/Znajomi.png'));
+  };
+
+  const handleClickInWydarzenia = () => {
+    setImageWydarzenia(require('../assets/Wydarzenia-biale.png'));
+  };
+  const handleClickOutWydarzenia = () => {
+    setImageWydarzenia(require('../assets/Wydarzenia.png'));
+  };
+
+  const handleClickInAwatar = () => {
+    setImageAwatar(require('../assets/Awatar-niebieski.png'));
+  };
+  const handleClickOutAwatar = () => {
+    setImageAwatar(require('../assets/Awatar.png'));
+  };
+
+  const handleClickInDzwonek = () => {
+    setImageDzwonek(require('../assets/Dzwonek-niebieski.png'));
+  };
+  const handleClickOutDzwonek = () => {
+    setImageDzwonek(require('../assets/Dzwonek.png'));
+  };
+
   const toggleOverlay = () => {
     setIsOverlayVisible(!isOverlayVisible);
   };
@@ -51,15 +94,22 @@ const Main = () => {
     <SafeAreaView style={styles.allpage}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.headerContainer}>
-          <Link href="/profile">
+          <Link href="/profile"
+            onPressIn={handleClickInAwatar}
+            onPressOut={handleClickOutAwatar}
+          >
             <View >
-              <Image source={require('../assets/Awatar.png')} resizeMode="contain" />
+              <Image source={imageAwatar} resizeMode="contain" />
             </View>
           </Link>
 
           <View style={styles.dzwonekContainer}>
-            <TouchableWithoutFeedback onPress={toggleOverlay}>
-              <Image source={require('../assets/Dzwonek.png')} />
+            <TouchableWithoutFeedback
+              onPress={toggleOverlay}
+              onPressIn={handleClickInDzwonek}
+              onPressOut={handleClickOutDzwonek}
+            >
+              <Image source={imageDzwonek} />
             </TouchableWithoutFeedback>
           </View>
         </View>
@@ -110,37 +160,43 @@ const Main = () => {
           </LinearGradient>
         </View>
 
-      
+
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.carousel}>
 
             <View style={styles.carouselItem}>
-              <Link href="/todo">
+              <Link href="/todo"
+                onPressIn={handleClickInToDo}
+                onPressOut={handleClickOutToDo}>
                 <View>
-                <Image source={require('../assets/To-Do.png')}/>
+                  <Image source={imageToDo} />
                 </View>
               </Link>
             </View>
 
             <View style={styles.carouselItem}>
-              <Link href="/friends'Friends">
-              <View>
-                <Image source={require('../assets/Znajomi.png')}/>
-              </View>
+              <Link href="/friends'Friends"
+                onPressIn={handleClickInZnajomi}
+                onPressOut={handleClickOutZnajomi}>
+                <View>
+                  <Image source={imageZnajomi} />
+                </View>
               </Link>
             </View>
 
             <View style={styles.carouselItem}>
-              <Link href="/wydarzenia">
-              <View>
-                <Image source={require('../assets/Wydarzenia.png')}/>
-              </View>
+              <Link href="/wydarzenia"
+                onPressIn={handleClickInWydarzenia}
+                onPressOut={handleClickOutWydarzenia}>
+                <View>
+                  <Image source={imageWydarzenia} />
+                </View>
               </Link>
             </View>
 
           </View>
         </ScrollView>
-        
+
 
         <View style={styles.bio}>
           <Image style={styles.bioimg} source={require('../assets/bioImg.png')} resizeMode="contain" />
@@ -149,20 +205,11 @@ const Main = () => {
 
             <TextInput
               style={styles.bioinput}
-              //onChangeText={onChangeNumber}
-              //value={number}
               placeholder="O czym teraz myślisz?"
               multiline
-            //keyboardType="numeric"
             />
           </View>
         </View>
-
-        {/* <View style={styles.poligonContainer}>
-          <Link href="/BarIndeksInfo">
-            <Text>poligon</Text>
-          </Link>
-        </View> */}
 
         <Overlay
           isVisible={isOverlayVisible}
@@ -200,7 +247,6 @@ const styles = StyleSheet.create({
   allpage: {
     backgroundColor: '#DCDADA',
     height: '100%',
-    //paddingTop: 10,
   },
   /////////////////////////////
   headerContainer: {
@@ -209,7 +255,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 10,
-    //paddingBottom: 10,
     marginLeft: 33,
     marginRight: 33,
   },
@@ -250,7 +295,6 @@ const styles = StyleSheet.create({
   /////////////////////////////
   bio: {
     flexDirection: 'row',
-    //height: 120,
     marginRight: 20,
     marginTop: 20,
     marginBottom: 0,
@@ -275,8 +319,6 @@ const styles = StyleSheet.create({
     paddingTop: 5,
     paddingLeft: 20,
     fontSize: 17,
-    //width: 230,
-    //height: 50
   },
   /////////////////////////////
   poligonContainer: {
@@ -288,11 +330,10 @@ const styles = StyleSheet.create({
   overlayStyle: {
     width: '75%',
     alignItems: 'center',
-    //height: 'auto',
     borderRadius: 20,
     backgroundColor: '#07BBF3',
   },
-  notificationBox: { //szary
+  notificationBox: {
     borderTopWidth: 2,
     borderTopColor: 'black',
     paddingBottom: 10,
@@ -317,7 +358,6 @@ const styles = StyleSheet.create({
   },
   rectangle: {
     backgroundColor: '#FFFEFE',
-    //flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     height: 60,

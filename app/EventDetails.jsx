@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
 import { Rating } from 'react-native-ratings';
@@ -9,6 +9,8 @@ import { KeyboardAvoidingView, Platform } from 'react-native';
 import * as Network from 'expo-network';
 
 const EventDetails = () => {
+  const SERVER_IP = '10.128.135.231';
+
   const route = useRoute();
 
   const { eventId } = route.params;
@@ -22,8 +24,10 @@ const EventDetails = () => {
   const [ip, setIp] = useState('');
   const [providerId, setProviderId] = useState('');
   const [flag, setFlag] = useState(false);
-  
+
   const [reload, setReload] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(true);
 
 
   const ratingCompleted = (Rating) => {
@@ -35,28 +39,91 @@ const EventDetails = () => {
     setIp(ip);
   });
 
-  const submitOpinion = (id_uslugodawcy) => {
-    Network.getIpAddressAsync().then(ip => {
-      axios.post(`http://192.168.0.162:3000/api/wydarzenia/wysylanie_opinii/${id_uslugodawcy}`, {
-        opinion: userOpinion,
-        rating: userRating,
-        ip: ip
-      })
+  useEffect(() => {
+    setIsLoading(true);
+    setTimeout(() => {
+      axios.get(`http://${SERVER_IP}:3000/api/wydarzenia/szczegoly/${eventId}`)
         .then(response => {
-          setUserOpinion('');
-          setUserRating(null);
-          setIp(ip);
-          setReload(!reload);
+          setEventDetails(response.data);
+          setProviderId(response.data[0].id_uslugodawcy);
         })
         .catch(error => {
-          console.error('Error submitting opinion:', error);
+          console.error('Error fetching event details:', error);
         });
-    });
+
+      axios.get(`http://${SERVER_IP}:3000/api/wydarzenia/godziny_otwarcia/${eventId}`)
+        .then(response => {
+          setOpeningHours(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching opening hours:', error);
+        });
+
+      axios.get(`http://${SERVER_IP}:3000/api/wydarzenia/ocena/${eventId}`)
+        .then(response => {
+          setRating(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching ocena:', error);
+        });
+
+      axios.get(`http://${SERVER_IP}:3000/api/wydarzenia/opinie/${eventId}`)
+        .then(response => {
+          for (let i = response.data.length - 1; i >= 0; i--) {
+            if (response.data[i].opis === null || response.data[i].opis === '' || response.data[i].opis.length === 0) {
+              //nie przesyłaj do tablicy
+              response.data.splice(i, 1);
+            }
+          }
+          setOpinions(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching ocena:', error);
+        });
+
+      axios.get(`http://${SERVER_IP}:3000/api/wydarzenia/walidacja_wysylanie_opinii?ip=${ip}&provider_id=${providerId}`)
+        .then(response => {
+          if (response.data.success) {
+            setFlag(false);
+          } else {
+            setFlag(true);
+          }
+        })
+        .catch(error => {
+          console.error('Error sending valid:', error);
+          Alert.alert('Błąd', 'Coś poszło nie tak podczas wysyłania');
+        });
+      setIsLoading(false);
+    }, 500); // Opóźnienie wynosi 2 sekundy
+  }, [reload, eventId, ip, providerId]);
+
+  const submitOpinion = (id_uslugodawcy) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      Network.getIpAddressAsync().then(ip => {
+        axios.post(`http://${SERVER_IP}:3000/api/wydarzenia/wysylanie_opinii/${id_uslugodawcy}`, {
+          opinion: userOpinion,
+          rating: userRating,
+          ip: ip
+        })
+          .then(response => {
+            setUserOpinion('');
+            setUserRating(null);
+            setIp(ip);
+            setReload(!reload);
+          })
+          .catch(error => {
+            console.error('Error submitting opinion:', error);
+          });
+      });
+      setIsLoading(false);
+    }, 500);
   };
+
 
   const deleteOpinion = () => {
     Network.getIpAddressAsync().then(ip => {
-      axios.post(`http://192.168.0.162:3000/api/wydarzenia/usuwanie_opinii`, {
+      axios.post(`http://${SERVER_IP}:3000/api/wydarzenia/usuwanie_opinii`, {
         id_uslugodawcy: providerId,
         ip: ip
       })
@@ -75,90 +142,10 @@ const EventDetails = () => {
     setUserRating(null);
   }
 
-  useEffect(() => {
-    axios.get(`http://192.168.0.162:3000/api/wydarzenia/szczegoly/${eventId}`)
-      .then(response => {
-        setEventDetails(response.data);
-        setProviderId(response.data[0].id_uslugodawcy);
-      })
-      .catch(error => {
-        console.error('Error fetching event details:', error);
-      });
-
-    axios.get(`http://192.168.0.162:3000/api/wydarzenia/godziny_otwarcia/${eventId}`)
-      .then(response => {
-        setOpeningHours(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching opening hours:', error);
-      });
-
-    axios.get(`http://192.168.0.162:3000/api/wydarzenia/ocena/${eventId}`)
-      .then(response => {
-        setRating(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching ocena:', error);
-      });
-
-    axios.get(`http://192.168.0.162:3000/api/wydarzenia/opinie/${eventId}`)
-      .then(response => {
-        for (let i = response.data.length - 1; i >= 0; i--) {
-          if (response.data[i].opis === null || response.data[i].opis === '' || response.data[i].opis.length === 0) {
-            //nie przesyłaj do tablicy
-            response.data.splice(i, 1);
-          }
-        }
-        setOpinions(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching ocena:', error);
-      });
-
-
-    //   async function sendValid() {
-    //   console.log('IP:', ip);
-    //   console.log('provider id:', providerId);
-    //   try {
-    //     const response = await axios.get(`http://192.168.0.162:3000/api/wydarzenia/walidacja_wysylanie_opinii?ip=${ip}&provider_id=${providerId}`);
-    //     if (response.data.success) {
-    //       //Alert.alert('Jest taki wpis');
-    //       //flag = true;
-    //       setFlag(false);
-    //     } else {
-    //       //Alert.alert('Nie ma takiego wpisu');
-    //       setFlag(true);
-    //     }
-    //   } catch (error) {
-    //     console.error('Error sending valid:', error);
-    //     Alert.alert('Błąd', 'Coś poszło nie tak podczas wysyłania');
-    //   }
-    // };
-
-    // sendValid();
-   
-      axios.get(`http://192.168.0.162:3000/api/wydarzenia/walidacja_wysylanie_opinii?ip=${ip}&provider_id=${providerId}`)
-        .then(response => {
-          if (response.data.success) {
-            //Alert.alert('Jest taki wpis');
-            //flag = true;
-            setFlag(false);
-          } else {
-            //Alert.alert('Nie ma takiego wpisu');
-            setFlag(true);
-          }
-        })
-        .catch(error => {
-          console.error('Error sending valid:', error);
-          Alert.alert('Błąd', 'Coś poszło nie tak podczas wysyłania');
-        });
-
-  }, [reload, eventId, ip, providerId]);
-
-  if (!eventDetails || !openingHours || !rating) {
+  if (isLoading) {
     return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#78C6F0" />
       </View>
     );
   }
@@ -178,6 +165,14 @@ const EventDetails = () => {
 
               <View style={styles.ColorContainer}>
                 <Text style={styles.opis}>{event.opis}</Text>
+                <View style={styles.row}>
+                  <Text style={styles.addressText}>Cena: </Text>
+                  {event.cena === null ?
+                    <Text style={styles.address}>- zł</Text>
+                    :
+                    <Text style={styles.address}>{event.cena} zł</Text>
+                  }
+                </View>
                 <View style={styles.row}>
                   <Text style={styles.addressText}>Oferta ważna od: </Text>
                   <Text style={styles.address}>{event.czas_rozpoczecia}</Text>
@@ -227,103 +222,106 @@ const EventDetails = () => {
 
           ))}
 
-          <View style={styles.ColorContainer}>
-            <Text style={styles.ocenaText}>Ocena:</Text>
-            {rating.map((star, index) => (
-              <View key={index} style={styles.row}>
-                <Text style={styles.ocenaText}>{star.avg_ilosc_gwiazdek}</Text>
-                <Rating
-                  readonly={true}
-                  showRating={false}
-                  onFinishRating={ratingCompleted}
-                  tintColor='#78C6F0'
-                  imageSize={30}
-                  startingValue={star.avg_ilosc_gwiazdek}
-                  style={{ marginHorizontal: 10, marginVertical: 5 }}
-                />
-
-                <Text style={styles.ocenaText}>{star.ilosc_opinii} ocen</Text>
-              </View>
-            ))}
-          </View>
-
-          <ScrollView style={styles.ColorContainerOpinia} showsVerticalScrollIndicator={false}>
-            <Text style={styles.opiniaText}>Opinie:</Text>
-
-
-            {opinions.map((opinion, index) => (
-              <View key={index} style={styles.opiniaContainer}>
-                <View style={styles.rowOpinie}>
-                  <View>
-                    <Text style={styles.opiniaCzas}>{opinion.czas}:</Text>
-                  </View>
-                  <Text style={styles.opiniaOpis}>{opinion.opis}</Text>
-                </View>
-              </View>
-            ))}
-
-
-            <View style={styles.space} />
-          </ScrollView>
-
-          {flag === true ? (
-            <View style={styles.ColorContainer}>
-              <View style={styles.row}>
-                <Text style={styles.ocenaText}>Twoja ocena</Text>
-
-                <Rating
-                  showRating={false}
-                  onFinishRating={ratingCompleted}
-                  tintColor='#78C6F0'
-                  imageSize={30}
-                  startingValue={0 || userRating}
-                  style={{ marginHorizontal: 10, marginVertical: 5 }}
-                />
-              </View>
-
-              <TextInput
-                style={styles.input}
-                onChangeText={setUserOpinion}
-                value={userOpinion}
-                multiline={true}
-                placeholder="Przekaż nam swoją opinię"
-                placeholderTextColor={'grey'}
-              />
-
-              <View style={styles.row}>
-                <View style={styles.przeslij}>
-                  <Button
-                    title="Anuluj"
-                    color={'red'}
-                    style={styles.ButtonStyle}
-                    onPress={() => resetUserInput()}
-                  />
-                </View>
-
-                {eventDetails.map((event, index) => (
-                  <View style={styles.przeslij} key={index}>
-                    <Button
-                      title="Prześlij"
-                      onPress={() => submitOpinion(event.id_uslugodawcy)}
+          {eventDetails.map((event, index) => (
+            <View key={index}>
+              <View style={styles.ColorContainer}>
+                <Text style={styles.ocenaText}>Ocena:</Text>
+                {rating.map((star, index) => (
+                  <View key={index} style={styles.row}>
+                    <Text style={styles.ocenaText}>{star.avg_ilosc_gwiazdek}</Text>
+                    <Rating
+                      readonly={true}
+                      showRating={false}
+                      onFinishRating={ratingCompleted}
+                      tintColor='#78C6F0'
+                      imageSize={30}
+                      startingValue={star.avg_ilosc_gwiazdek}
+                      style={{ marginHorizontal: 10, marginVertical: 5 }}
                     />
+
+                    <Text style={styles.ocenaText}>{star.ilosc_opinii} ocen</Text>
                   </View>
                 ))}
               </View>
-            </View>
-          ) : (
-            <View style={styles.przekazalesOpinie}>
-              <Text style={styles.ocenaText}>Przekazałeś już swoją opinię</Text>
-              <View style={styles.przeslijUsuwanie}>
-                <Button
-                  title="Prześlij opinię jeszcze raz"
-                  color={'red'}
-                  style={styles.ButtonStyle}
-                  onPress={() => deleteOpinion()}
-                />
-              </View>
-            </View>
 
-          )}
+              <ScrollView style={styles.ColorContainerOpinia} showsVerticalScrollIndicator={false}>
+                <Text style={styles.opiniaText}>Opinie:</Text>
+
+
+                {opinions.map((opinion, index) => (
+                  <View key={index} style={styles.opiniaContainer}>
+                    <View style={styles.rowOpinie}>
+                      <View>
+                        <Text style={styles.opiniaCzas}>{opinion.czas}:</Text>
+                      </View>
+                      <Text style={styles.opiniaOpis}>{opinion.opis}</Text>
+                    </View>
+                  </View>
+                ))}
+
+
+                <View style={styles.space} />
+              </ScrollView>
+
+              {flag === true ? (
+                <View style={styles.ColorContainer}>
+                  <View style={styles.row}>
+                    <Text style={styles.ocenaText}>Twoja ocena</Text>
+
+                    <Rating
+                      showRating={false}
+                      onFinishRating={ratingCompleted}
+                      tintColor='#78C6F0'
+                      imageSize={30}
+                      startingValue={0 || userRating}
+                      style={{ marginHorizontal: 10, marginVertical: 5 }}
+                    />
+                  </View>
+
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={setUserOpinion}
+                    value={userOpinion}
+                    multiline={true}
+                    placeholder="Przekaż nam swoją opinię"
+                    placeholderTextColor={'grey'}
+                  />
+
+                  <View style={styles.row}>
+                    <View style={styles.przeslij}>
+                      <Button
+                        title="Anuluj"
+                        color={'red'}
+                        style={styles.ButtonStyle}
+                        onPress={() => resetUserInput()}
+                      />
+                    </View>
+
+                    {eventDetails.map((event, index) => (
+                      <View style={styles.przeslij} key={index}>
+                        <Button
+                          title="Prześlij"
+                          onPress={() => submitOpinion(event.id_uslugodawcy)}
+                        />
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              ) : (
+                <View style={styles.przekazalesOpinie}>
+                  <Text style={styles.ocenaText}>Przekazałeś już swoją opinię</Text>
+                  <View style={styles.przeslijUsuwanie}>
+                    <Button
+                      title="Prześlij opinię jeszcze raz"
+                      color={'red'}
+                      style={styles.ButtonStyle}
+                      onPress={() => deleteOpinion()}
+                    />
+                  </View>
+                </View>
+              )}
+            </View>
+           ))}
 
         </SafeAreaView>
       </ScrollView>
@@ -444,7 +442,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'white',
     fontWeight: 'bold',
-
     marginLeft: 10,
     lineHeight: 22,
   },
@@ -469,7 +466,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     justifyContent: 'center'
   },
-  przeslijUsuwanie:{
+  przeslijUsuwanie: {
     backgroundColor: '#78C6F0',
     color: 'white',
     padding: 10,
@@ -523,10 +520,12 @@ const styles = StyleSheet.create({
   opiniaOpis: {
     fontSize: 16,
     marginLeft: 10,
-  }
-
-
-
+  },
+  loading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 export default EventDetails;
