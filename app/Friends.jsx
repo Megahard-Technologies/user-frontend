@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Image, TouchableWithoutFeedback } from 'react-native';
-import { Link } from 'expo-router';
 import { Overlay, Text } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 
 const index = () => {
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
@@ -23,14 +21,11 @@ const index = () => {
       <TouchableWithoutFeedback onPress={toggleOverlay}>
         <View style={styles.rectangle}>
           <View style={styles.row}>
-
             <Image style={styles.photo} source={require('../assets/JanKowalski.png')} />
             <Text style={styles.tekstImie}>Jan Kowalski</Text>
-
           </View>
         </View>
       </TouchableWithoutFeedback>
-
 
       <TouchableWithoutFeedback onPress={toggleOverlay}>
         <View style={styles.rectangle}>
@@ -68,35 +63,24 @@ const index = () => {
         </View>
       </TouchableWithoutFeedback>
 
-      <View style={styles.fill}/>
+      <View style={styles.fill} />
       <Overlay
         isVisible={isOverlayVisible}
         onBackdropPress={closeOverlay}
-        overlayStyle={styles.overlayAction}
+        overlayStyle={styles.overlayStyle}
       >
-        <View style={styles.containerAction}>
-          <Text style={styles.headerOvelayTextAction}>Znajomy</Text>
-        </View>
 
-        <View style={styles.containerAction}>
-          <View style={styles.lineAction} />
-        </View>
+        <Text style={styles.headerOvelayTextAction}>Znajomy</Text>
+        <View style={styles.notificationBox}>
+            <View style={styles.rectangleOverlay}>
+              <Text style={styles.notificationText}>Usuń z grona znajomych</Text>
+            </View>
+            <View style={styles.rectangleOverlay}>
+              <Text style={styles.notificationTextZglos}>Zgłoś</Text>
+            </View>
 
-        <View style={styles.notificationBoxAction}>
-          <View style={styles.rectangleAction}>
-            <Text style={styles.notificationTextAction}>Usuń z grona znajomych</Text>
           </View>
-
-          <View style={styles.rectangleAction}>
-            <Text style={styles.notificationTextAction}>Obserwuj</Text>
-          </View>
-
-          <View style={styles.rectangleAction}>
-            <Text style={styles.notificationTextRedAction}>Zgłoś</Text>
-          </View>
-        </View>
       </Overlay>
-
     </SafeAreaView>
   )
 }
@@ -107,17 +91,14 @@ const styles = StyleSheet.create({
   background: {
     backgroundColor: '#DCDADA',
   },
-
   tekstNagl: {
     marginLeft: 25,
     marginBottom: 15,
     fontSize: 26,
   },
-
   tekstImie: {
     fontSize: 26,
   },
-
   rectangle: {
     width: '90%',
     height: 70,
@@ -130,84 +111,64 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 15,
   },
-
   row: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-
   photo: {
     marginLeft: 10,
     marginRight: 10,
   },
-
-  containerAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 10,
-    marginLeft: 33,
-    marginRight: 33,
-  },
-
-  overlayAction: {
-    width: '80%',
-    alignItems: 'center',
-    height: 325,
-    borderRadius: 20,
-    backgroundColor: '#07BBF3',
-  },
-
   headerOvelayTextAction: {
     fontSize: 26,
     textAlign: 'center',
     color: 'white',
   },
-
-  lineAction: {
-    height: 2,
-    width: 360,
-    backgroundColor: 'black',
-  },
-
-  notificationBoxAction: {
-    height: 250,
-    width: 360,
+  fill: {
     backgroundColor: '#DCDADA',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    alignItems: 'center',
-    marginTop: -10
+    height: 450,
   },
-
-  notificationTextAction: {
+  overlayStyle: {
+    width: '75%',
+    alignItems: 'center',
+    borderRadius: 20,
+    backgroundColor: '#07BBF3',
+  },
+  notificationBox: {
+    borderTopWidth: 2,
+    borderTopColor: 'black',
+    paddingBottom: 10,
+    marginBottom: -10,
+    width: '106%',
+    backgroundColor: '#DCDADA',
+    alignItems: 'center',
+    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 20
+  },
+  headerOvelayText: {
+    fontSize: 26,
+    textAlign: 'center',
+    color: 'white',
+    paddingBottom: 10,
+  },
+  notificationText: {
     fontSize: 20,
     textAlign: 'center',
     color: 'black',
   },
-
-  notificationTextRedAction: {
+  notificationTextZglos: {
     fontSize: 20,
     textAlign: 'center',
     color: 'red',
   },
-
-  rectangleAction: {
+  rectangleOverlay: {
     backgroundColor: '#FFFEFE',
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 70,
+    height: 60,
     width: '90%',
     marginTop: 10,
     borderRadius: 5,
     elevation: 5,
-  },
-
-  fill:{
-    backgroundColor: '#DCDADA',
-    height:450,
   }
-
 })

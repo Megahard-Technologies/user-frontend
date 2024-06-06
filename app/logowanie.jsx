@@ -1,6 +1,6 @@
+// usunięte z projektu
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Button, Alert } from 'react-native';
-
 import axios from 'axios';
 import { Stack } from 'expo-router'
 import { useNavigation } from 'expo-router';

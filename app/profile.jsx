@@ -15,7 +15,6 @@ const Index = () => {
   return (
     <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
     <SafeAreaView style={styles.backgound}>
-     
         <View style={styles.rowe}>
           <Image style={styles.photo} source={require('../assets/profile_photo.png')} />
         </View>
@@ -79,12 +78,10 @@ const Index = () => {
         </View>
 
         <View style={styles.row}></View>
-        
     </SafeAreaView>
     </ScrollView>
   )
 }
-
 export default Index;
 
 const styles = StyleSheet.create({
@@ -97,7 +94,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   photo: {
     width: 256,
     height: 256,
@@ -106,13 +102,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginTop: 10,
   },
-
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 15,
   },
-
   rectangle: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -124,7 +118,6 @@ const styles = StyleSheet.create({
     borderColor: '#07BBF3',
     elevation: 5
   },
-
   lineGray: {
     borderWidth: 1,
     borderColor: '#626262',
@@ -132,20 +125,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: '100%',
   },
-
   text: {
     flex: 1,
     textAlign: 'left',
     fontSize: 25
   },
-
   logout: {
     fontWeight: 'bold',
     fontSize: 28,
     color: 'red',
     marginTop: 29,
   },
-
   dropdownButtonStyle: {
     width: 150,
     height: 50,
@@ -158,7 +148,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     elevation: 5,
   },
-
   dropdownButtonTxtStyle: {
     flex: 1,
     fontSize: 18,
@@ -166,7 +155,6 @@ const styles = StyleSheet.create({
     color: '#2B2B2B',
     textAlign: 'center',
   },
-
   dropdownItemStyle: {
     width: '100%',
     justifyContent: 'center',
@@ -174,7 +162,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: '#78C6F0',
   },
-
   dropdownItemTxtStyle: {
     flex: 1,
     fontSize: 18,
@@ -182,7 +169,6 @@ const styles = StyleSheet.create({
     color: '#2B2B2B',
     textAlign: 'center',
   },
-
   dropdownMenuStyle: {
     backgroundColor: '#E9ECEF',
     borderRadius: 8,

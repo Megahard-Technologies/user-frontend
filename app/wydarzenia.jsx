@@ -5,7 +5,8 @@ import axios from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Wydarzenia = () => {
-    const SERVER_IP = '10.128.135.231';
+    const SERVER_IP_PORT = '192.168.0.110:3000';
+    const DELAY = 300;
 
     const navigation = useNavigation();
     const [events, setEvents] = useState([]);
@@ -15,7 +16,7 @@ const Wydarzenia = () => {
     useEffect(() => {
         setIsLoading(true);
         setTimeout(() => {
-        axios.get(`http://${SERVER_IP}:3000/api/wydarzenia`)
+        axios.get(`http://${SERVER_IP_PORT}/api/wydarzenia`)
             .then(response => {
                 setEvents(response.data);
                 setIsLoading(false);
@@ -23,9 +24,8 @@ const Wydarzenia = () => {
             .catch(error => {
                 console.error('Error fetching events:', error);
             });
-        }, 500);
+        }, DELAY);
     }, []);
-
 
     const handleEventPress = (eventId) => {
         navigation.navigate('EventDetails', { eventId });
@@ -53,7 +53,6 @@ const Wydarzenia = () => {
         );
     }
 
-
     return (
         <ScrollView showsVerticalScrollIndicator={false}>
             <SafeAreaView>
@@ -77,7 +76,6 @@ const Wydarzenia = () => {
                                     <Text style={styles.address}>{event.adres}</Text>
                                 </View>
                             </View>
-
                         </TouchableOpacity>
                     ))}
                 </View>
@@ -142,5 +140,4 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 });
-
 export default Wydarzenia;

@@ -9,7 +9,8 @@ import { KeyboardAvoidingView, Platform } from 'react-native';
 import * as Network from 'expo-network';
 
 const EventDetails = () => {
-  const SERVER_IP = '10.128.135.231';
+  const SERVER_IP_PORT = '192.168.0.110:3000';
+  const DELAY = 300;
 
   const route = useRoute();
 
@@ -29,9 +30,7 @@ const EventDetails = () => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-
   const ratingCompleted = (Rating) => {
-    //console.warn("Rating is: " + Rating);
     setUserRating(Rating);
   };
 
@@ -42,7 +41,7 @@ const EventDetails = () => {
   useEffect(() => {
     setIsLoading(true);
     setTimeout(() => {
-      axios.get(`http://${SERVER_IP}:3000/api/wydarzenia/szczegoly/${eventId}`)
+      axios.get(`http://${SERVER_IP_PORT}/api/wydarzenia/szczegoly/${eventId}`)
         .then(response => {
           setEventDetails(response.data);
           setProviderId(response.data[0].id_uslugodawcy);
@@ -51,7 +50,7 @@ const EventDetails = () => {
           console.error('Error fetching event details:', error);
         });
 
-      axios.get(`http://${SERVER_IP}:3000/api/wydarzenia/godziny_otwarcia/${eventId}`)
+      axios.get(`http://${SERVER_IP_PORT}/api/wydarzenia/godziny_otwarcia/${eventId}`)
         .then(response => {
           setOpeningHours(response.data);
         })
@@ -59,7 +58,7 @@ const EventDetails = () => {
           console.error('Error fetching opening hours:', error);
         });
 
-      axios.get(`http://${SERVER_IP}:3000/api/wydarzenia/ocena/${eventId}`)
+      axios.get(`http://${SERVER_IP_PORT}/api/wydarzenia/ocena/${eventId}`)
         .then(response => {
           setRating(response.data);
         })
@@ -67,7 +66,7 @@ const EventDetails = () => {
           console.error('Error fetching ocena:', error);
         });
 
-      axios.get(`http://${SERVER_IP}:3000/api/wydarzenia/opinie/${eventId}`)
+      axios.get(`http://${SERVER_IP_PORT}/api/wydarzenia/opinie/${eventId}`)
         .then(response => {
           for (let i = response.data.length - 1; i >= 0; i--) {
             if (response.data[i].opis === null || response.data[i].opis === '' || response.data[i].opis.length === 0) {
@@ -81,7 +80,7 @@ const EventDetails = () => {
           console.error('Error fetching ocena:', error);
         });
 
-      axios.get(`http://${SERVER_IP}:3000/api/wydarzenia/walidacja_wysylanie_opinii?ip=${ip}&provider_id=${providerId}`)
+      axios.get(`http://${SERVER_IP_PORT}/api/wydarzenia/walidacja_wysylanie_opinii?ip=${ip}&provider_id=${providerId}`)
         .then(response => {
           if (response.data.success) {
             setFlag(false);
@@ -94,14 +93,12 @@ const EventDetails = () => {
           Alert.alert('Błąd', 'Coś poszło nie tak podczas wysyłania');
         });
       setIsLoading(false);
-    }, 500); // Opóźnienie wynosi 2 sekundy
+    }, DELAY);
   }, [reload, eventId, ip, providerId]);
 
   const submitOpinion = (id_uslugodawcy) => {
-    setIsLoading(true);
-    setTimeout(() => {
       Network.getIpAddressAsync().then(ip => {
-        axios.post(`http://${SERVER_IP}:3000/api/wydarzenia/wysylanie_opinii/${id_uslugodawcy}`, {
+        axios.post(`http://${SERVER_IP_PORT}/api/wydarzenia/wysylanie_opinii/${id_uslugodawcy}`, {
           opinion: userOpinion,
           rating: userRating,
           ip: ip
@@ -116,14 +113,11 @@ const EventDetails = () => {
             console.error('Error submitting opinion:', error);
           });
       });
-      setIsLoading(false);
-    }, 500);
   };
-
 
   const deleteOpinion = () => {
     Network.getIpAddressAsync().then(ip => {
-      axios.post(`http://${SERVER_IP}:3000/api/wydarzenia/usuwanie_opinii`, {
+      axios.post(`http://${SERVER_IP_PORT}/api/wydarzenia/usuwanie_opinii`, {
         id_uslugodawcy: providerId,
         ip: ip
       })
@@ -150,7 +144,6 @@ const EventDetails = () => {
     );
   }
 
-
   return (
     <KeyboardAvoidingView behavior="position" style={{ flex: 1 }}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -166,11 +159,13 @@ const EventDetails = () => {
               <View style={styles.ColorContainer}>
                 <Text style={styles.opis}>{event.opis}</Text>
                 <View style={styles.row}>
-                  <Text style={styles.addressText}>Cena: </Text>
-                  {event.cena === null ?
-                    <Text style={styles.address}>- zł</Text>
+                  {event.cena != null ?
+                    <>
+                      <Text style={styles.addressText}>Cena: </Text>
+                      <Text style={styles.address}>{event.cena} zł</Text>
+                    </>
                     :
-                    <Text style={styles.address}>{event.cena} zł</Text>
+                    null
                   }
                 </View>
                 <View style={styles.row}>
@@ -181,7 +176,6 @@ const EventDetails = () => {
                   <Text style={styles.addressText}>Oferta ważna do: </Text>
                   <Text style={styles.address}>{event.czas_zakonczenia}</Text>
                 </View>
-
                 <View style={styles.space} />
               </View>
 
@@ -216,10 +210,8 @@ const EventDetails = () => {
 
                 <View style={styles.space} />
               </View>
-
               <View style={styles.line} />
             </View>
-
           ))}
 
           {eventDetails.map((event, index) => (
@@ -247,7 +239,6 @@ const EventDetails = () => {
               <ScrollView style={styles.ColorContainerOpinia} showsVerticalScrollIndicator={false}>
                 <Text style={styles.opiniaText}>Opinie:</Text>
 
-
                 {opinions.map((opinion, index) => (
                   <View key={index} style={styles.opiniaContainer}>
                     <View style={styles.rowOpinie}>
@@ -258,8 +249,6 @@ const EventDetails = () => {
                     </View>
                   </View>
                 ))}
-
-
                 <View style={styles.space} />
               </ScrollView>
 
@@ -309,7 +298,7 @@ const EventDetails = () => {
                 </View>
               ) : (
                 <View style={styles.przekazalesOpinie}>
-                  <Text style={styles.ocenaText}>Przekazałeś już swoją opinię</Text>
+                  <Text style={styles.ocenaText}>Twoja opinia została już przekazana.</Text>
                   <View style={styles.przeslijUsuwanie}>
                     <Button
                       title="Prześlij opinię jeszcze raz"
@@ -321,7 +310,7 @@ const EventDetails = () => {
                 </View>
               )}
             </View>
-           ))}
+          ))}
 
         </SafeAreaView>
       </ScrollView>
@@ -527,5 +516,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
 export default EventDetails;

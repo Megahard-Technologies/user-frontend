@@ -7,8 +7,7 @@ import { Calendar } from 'react-native-calendars';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LocaleConfig } from 'react-native-calendars';
 import { Slot, Stack } from 'expo-router'
-import Profile from './profile';
-//import { SafeAreaView } from 'react-native';
+import Profile from './Profile';
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 const Main = () => {
@@ -88,13 +87,11 @@ const Main = () => {
   };
   LocaleConfig.defaultLocale = 'pl';
 
-
-
   return (
     <SafeAreaView style={styles.allpage}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.headerContainer}>
-          <Link href="/profile"
+          <Link href="/Profile"
             onPressIn={handleClickInAwatar}
             onPressOut={handleClickOutAwatar}
           >
@@ -118,7 +115,6 @@ const Main = () => {
           <LinearGradient // Dodanie LinearGradient jako tło
             colors={['#5AC8EB', '#0B8CB5']} // Kolory gradientu
             style={styles.linearGradient} // Styl gradientu
-
           >
             <Calendar
               onDayPress={day => {
@@ -155,17 +151,15 @@ const Main = () => {
 
                 textDisabledColor: '#40403f', //dni spoza danego miesiąca
               }}
-
             />
           </LinearGradient>
         </View>
-
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.carousel}>
 
             <View style={styles.carouselItem}>
-              <Link href="/todo"
+              <Link href="/ToDo"
                 onPressIn={handleClickInToDo}
                 onPressOut={handleClickOutToDo}>
                 <View>
@@ -175,7 +169,7 @@ const Main = () => {
             </View>
 
             <View style={styles.carouselItem}>
-              <Link href="/friends'Friends"
+              <Link href="/Friends"
                 onPressIn={handleClickInZnajomi}
                 onPressOut={handleClickOutZnajomi}>
                 <View>
@@ -185,7 +179,7 @@ const Main = () => {
             </View>
 
             <View style={styles.carouselItem}>
-              <Link href="/wydarzenia"
+              <Link href="/Wydarzenia"
                 onPressIn={handleClickInWydarzenia}
                 onPressOut={handleClickOutWydarzenia}>
                 <View>
@@ -196,7 +190,6 @@ const Main = () => {
 
           </View>
         </ScrollView>
-
 
         <View style={styles.bio}>
           <Image style={styles.bioimg} source={require('../assets/bioImg.png')} resizeMode="contain" />
@@ -236,7 +229,6 @@ const Main = () => {
               <Text style={styles.notificationText}>Lidl: Obniżka cen!</Text>
             </View>
           </View>
-
         </Overlay>
       </ScrollView>
     </SafeAreaView>
